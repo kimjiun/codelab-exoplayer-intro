@@ -17,11 +17,13 @@ package com.example.exoplayer
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.exoplayer.databinding.ActivityPlayerBinding
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.util.MimeTypes
@@ -30,6 +32,7 @@ import com.google.android.exoplayer2.util.MimeTypes
  * A fullscreen activity to play audio or video streams.
  */
 class PlayerActivity : AppCompatActivity() {
+    private val TAG = "PlayerActivity"
     var player: SimpleExoPlayer? = null
     private var playWhenReady = true
     private var currentWindow = 0
@@ -66,6 +69,7 @@ class PlayerActivity : AppCompatActivity() {
 
                 simpleExoPlayer.playWhenReady = playWhenReady
                 simpleExoPlayer.seekTo(currentWindow, playbackPosition)
+                player?.addListener(playbackStateListener())
                 simpleExoPlayer.prepare()
             }
     }
@@ -75,6 +79,7 @@ class PlayerActivity : AppCompatActivity() {
             playbackPosition = this.currentPosition
             currentWindow = this.currentWindowIndex
             playWhenReady = this.playWhenReady
+            removeListener(playbackStateListener())
             release()
         }
         player = null
@@ -110,5 +115,20 @@ class PlayerActivity : AppCompatActivity() {
                 or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+    }
+
+    private fun playbackStateListener() = object : Player.Listener{
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            super.onPlaybackStateChanged(playbackState)
+            val stateString: String = when (playbackState) {
+                ExoPlayer.STATE_IDLE -> "ExoPlayer.STATE_IDLE      -"
+                ExoPlayer.STATE_BUFFERING -> "ExoPlayer.STATE_BUFFERING -"
+                ExoPlayer.STATE_READY -> "ExoPlayer.STATE_READY     -"
+                ExoPlayer.STATE_ENDED -> "ExoPlayer.STATE_ENDED     -"
+                else -> "UNKNOWN_STATE             -"
+            }
+
+            Log.d(TAG, "changed state to $stateString")
+        }
     }
 }
