@@ -23,6 +23,8 @@ import com.example.exoplayer.databinding.ActivityPlayerBinding
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.util.MimeTypes
 
 /**
  * A fullscreen activity to play audio or video streams.
@@ -43,17 +45,24 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun initExoPlayer(){
+        val trackSelector = DefaultTrackSelector(this@PlayerActivity).apply {
+            setParameters(buildUponParameters().setMaxVideoSizeSd())
+        }
+
         // ExoPlayer 만들기
-        player = SimpleExoPlayer.Builder(this@PlayerActivity).build()
+        player = SimpleExoPlayer.Builder(this@PlayerActivity)
+            .setTrackSelector(trackSelector)
+            .build()
             .also { simpleExoPlayer ->
                 viewBinding.videoView.player = simpleExoPlayer
 
                 // 미디어 항목 만들기
-                val mediaItem = MediaItem.fromUri(getString(R.string.media_url_mp4))
-                simpleExoPlayer.addMediaItem(mediaItem)
-                simpleExoPlayer.addMediaItem(MediaItem.fromUri(getString(R.string.media_url_mp3)))
+                val mediaItem = MediaItem.Builder()
+                    .setUri(getString(R.string.media_url_dash))
+                    .setMimeType(MimeTypes.APPLICATION_MPD)
+                    .build()
 
-                simpleExoPlayer.removeMediaItem(1)
+                simpleExoPlayer.addMediaItem(mediaItem)
 
                 simpleExoPlayer.playWhenReady = playWhenReady
                 simpleExoPlayer.seekTo(currentWindow, playbackPosition)
