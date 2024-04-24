@@ -50,7 +50,11 @@ class PlayerActivity : AppCompatActivity() {
 
                 // 미디어 항목 만들기
                 val mediaItem = MediaItem.fromUri(getString(R.string.media_url_mp4))
-                simpleExoPlayer.setMediaItem(mediaItem)
+                simpleExoPlayer.addMediaItem(mediaItem)
+                simpleExoPlayer.addMediaItem(MediaItem.fromUri(getString(R.string.media_url_mp3)))
+
+                simpleExoPlayer.removeMediaItem(1)
+
                 simpleExoPlayer.playWhenReady = playWhenReady
                 simpleExoPlayer.seekTo(currentWindow, playbackPosition)
                 simpleExoPlayer.prepare()
